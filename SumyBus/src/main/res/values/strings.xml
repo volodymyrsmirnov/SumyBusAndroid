@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sumy Bus</string>
+    <string name="title_activity_map">Route Map</string>
+    <string name="map_loading_route_info">Loading route information</string>
+    <string name="map_loading_route_path">Loading route path</string>
+    <string name="map_loading_route_stops">Loading route stops</string>
+    <string name="map_loading_route_cars">Loading route cars</string>
+    <string name="map_loading_window">Loading route map</string>
+    <string name="map_loading_error_no_internet">No internet connection detected</string>
+    <string name="map_loading_error_empty">This route does not seem to have GPS tracking enabled yet</string>
+    <string name="close">Close</string>
+
+</resources>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+    <dict>
+        <key>17A</key>
+        <dict>
+            <key>id</key>
+            <integer>16</integer>
+            <key>name</key>
+            <string>Прокоф’єва - Хіммістечко</string>
+        </dict>
+        <key>24</key>
+        <dict>
+            <key>id</key>
+            <integer>36</integer>
+            <key>name</key>
+            <string>Баранівка - Баранівка</string>
+        </dict>
+        <key>57</key>
+        <dict>
+            <key>id</key>
+            <integer>35</integer>
+            <key>name</key>
+            <string>Роменська - Баранівка</string>
+        </dict>
+        <key>51</key>
+        <dict>
+            <key>id</key>
+            <integer>34</integer>
+            <key>name</key>
+            <string>Піщане - Прокоф’єва</string>
+        </dict>
+        <key>01</key>
+        <dict>
+            <key>name</key>
+            <string>Роменська - Гамалiя</string>
+            <key>id</key>
+            <integer>0</integer>
+        </dict>
+        <key>02</key>
+        <dict>
+            <key>name</key>
+            <string>Ковпака - Прокоф’єва</string>
+            <key>id</key>
+            <integer>1</integer>
+        </dict>
+        <key>03</key>
+        <dict>
+            <key>name</key>
+            <string>Аеропорт - Черепiна</string>
+            <key>id</key>
+            <integer>2</integer>
+        </dict>
+        <key>04</key>
+        <dict>
+            <key>name</key>
+            <string>Аеропорт - Хіммістечко</string>
+            <key>id</key>
+            <integer>3</integer>
+        </dict>
+        <key>05</key>
+        <dict>
+            <key>name</key>
+            <string>Роменська - Хіммістечко</string>
+            <key>id</key>
+            <integer>4</integer>
+        </dict>
+        <key>06</key>
+        <dict>
+            <key>name</key>
+            <string>Хіммістечко - Ковпака</string>
+            <key>id</key>
+            <integer>5</integer>
+        </dict>
+        <key>07</key>
+        <dict>
+            <key>name</key>
+            <string>Хіммістечко - Баранівка</string>
+            <key>id</key>
+            <integer>6</integer>
+        </dict>
+        <key>08</key>
+        <dict>
+            <key>name</key>
+            <string>Василівка - Тополянська</string>
+            <key>id</key>
+            <integer>7</integer>
+        </dict>
+        <key>09</key>
+        <dict>
+            <key>name</key>
+            <string>Добровільна - Прокоф’єва</string>
+            <key>id</key>
+            <integer>8</integer>
+        </dict>
+        <key>10</key>
+        <dict>
+            <key>name</key>
+            <string>Косівщина - Черепiна</string>
+            <key>id</key>
+            <integer>9</integer>
+        </dict>
+        <key>11</key>
+        <dict>
+            <key>name</key>
+            <string>Тепличний - Тепличний</string>
+            <key>id</key>
+            <integer>10</integer>
+        </dict>
+        <key>12</key>
+        <dict>
+            <key>name</key>
+            <string>Тімірязівка - Тімірязівка</string>
+            <key>id</key>
+            <integer>11</integer>
+        </dict>
+        <key>13</key>
+        <dict>
+            <key>name</key>
+            <string>Тепличний - Черепіна</string>
+            <key>id</key>
+            <integer>12</integer>
+        </dict>
+        <key>14</key>
+        <dict>
+            <key>name</key>
+            <string>Тімірязівка - З.Вокзал</string>
+            <key>id</key>
+            <integer>13</integer>
+        </dict>
+        <key>15</key>
+        <dict>
+            <key>name</key>
+            <string>СНАУ - Коледж СНАУ</string>
+            <key>id</key>
+            <integer>14</integer>
+        </dict>
+        <key>16</key>
+        <dict>
+            <key>name</key>
+            <string>Ковпака - Баранівка</string>
+            <key>id</key>
+            <integer>15</integer>
+        </dict>
+        <key>17</key>
+        <dict>
+            <key>name</key>
+            <string>Прокоф’єва - Хіммістечко</string>
+            <key>id</key>
+            <integer>16</integer>
+        </dict>
+        <key>18</key>
+        <dict>
+            <key>name</key>
+            <string>Веретенівка - Черепіна</string>
+            <key>id</key>
+            <integer>17</integer>
+        </dict>
+        <key>19</key>
+        <dict>
+            <key>name</key>
+            <string>Роменська - Ковпака</string>
+            <key>id</key>
+            <integer>18</integer>
+        </dict>
+        <key>20</key>
+        <dict>
+            <key>name</key>
+            <string>Аеропорт - Ковпака</string>
+            <key>id</key>
+            <integer>19</integer>
+        </dict>
+        <key>21</key>
+        <dict>
+            <key>name</key>
+            <string>Прокоф’єва - Прокоф’єва</string>
+            <key>id</key>
+            <integer>20</integer>
+        </dict>
+        <key>22</key>
+        <dict>
+            <key>name</key>
+            <string>Веретенівка - Хіммістечко</string>
+            <key>id</key>
+            <integer>21</integer>
+        </dict>
+        <key>23</key>
+        <dict>
+            <key>name</key>
+            <string>Тепличний - Тепличний</string>
+            <key>id</key>
+            <integer>22</integer>
+        </dict>
+        <key>52</key>
+        <dict>
+            <key>name</key>
+            <string>Ковпака - Прокоф’єва</string>
+            <key>id</key>
+            <integer>23</integer>
+        </dict>
+        <key>53</key>
+        <dict>
+            <key>name</key>
+            <string>Добровільна - Аеропорт</string>
+            <key>id</key>
+            <integer>24</integer>
+        </dict>
+        <key>54</key>
+        <dict>
+            <key>name</key>
+            <string>Косівщина - Хіммістечко</string>
+            <key>id</key>
+            <integer>25</integer>
+        </dict>
+        <key>55</key>
+        <dict>
+            <key>name</key>
+            <string>Роменська - Черепіна</string>
+            <key>id</key>
+            <integer>26</integer>
+        </dict>
+        <key>56</key>
+        <dict>
+            <key>name</key>
+            <string>Ганнівка - Хіммістечко</string>
+            <key>id</key>
+            <integer>27</integer>
+        </dict>
+        <key>57А</key>
+        <dict>
+            <key>name</key>
+            <string>Баранівка - Центр</string>
+            <key>id</key>
+            <integer>28</integer>
+        </dict>
+        <key>58</key>
+        <dict>
+            <key>name</key>
+            <string>Тополянська - Василівка</string>
+            <key>id</key>
+            <integer>29</integer>
+        </dict>
+        <key>59</key>
+        <dict>
+            <key>name</key>
+            <string>Веретенівка - Баси</string>
+            <key>id</key>
+            <integer>30</integer>
+        </dict>
+        <key>59А</key>
+        <dict>
+            <key>name</key>
+            <string>Баси - Центр</string>
+            <key>id</key>
+            <integer>31</integer>
+        </dict>
+        <key>60</key>
+        <dict>
+            <key>name</key>
+            <string>В.Піщане - Аеропорт</string>
+            <key>id</key>
+            <integer>32</integer>
+        </dict>
+        <key>61</key>
+        <dict>
+            <key>name</key>
+            <string>Автовокзал - Хіммістечко</string>
+            <key>id</key>
+            <integer>33</integer>
+        </dict>
+    </dict>
+</plist>

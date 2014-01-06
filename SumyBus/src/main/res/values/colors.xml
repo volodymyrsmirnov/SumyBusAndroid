@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="route_pressed_color">#17a589</color>
+    <color name="route_default_color">#f3f3f3</color>
+    <color name="route_color_to">#ff0000</color>
+    <color name="route_color_from">#ff0000</color>
+</resources>
