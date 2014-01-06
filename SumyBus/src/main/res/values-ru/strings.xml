@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="app_name">Sumy Bus</string>
+    <string name="title_activity_map">Карта маршрута</string>
+    <string name="map_loading_route_info">Загружаю данные маршрута</string>
+    <string name="map_loading_route_path">Загружаю маршрут</string>
+    <string name="map_loading_route_stops">Загружаю список остановок</string>
+    <string name="map_loading_route_cars">Загружаю список маршруток</string>
+    <string name="map_loading_window">Загружаю карту маршрута</string>
+    <string name="map_loading_error_no_internet">Активное подключение к интернету не обнаружено</string>
+    <string name="map_loading_error_empty">На этом маршруте пока еще не активировано GPS отслеживание</string>
+    <string name="close">Закрыть</string>
+
+</resources>
