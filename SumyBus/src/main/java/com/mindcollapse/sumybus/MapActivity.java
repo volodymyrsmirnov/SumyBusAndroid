@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.widget.TextView;
 import android.os.Handler;
@@ -23,7 +23,7 @@ import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import com.yandex.metrica.Counter;
 
-public class MapActivity extends Activity {
+public class MapActivity extends FragmentActivity {
     private Route route;
     private GoogleMap map;
     private ProgressDialog progress;
@@ -68,31 +68,33 @@ public class MapActivity extends Activity {
         cars = new HashMap<String, Marker>();
         handler = new Handler();
 
-        TextView routeName = (TextView) findViewById(R.id.map_route_name);
-        routeName.setText(route.getDescription());
-
-        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
-        map.getUiSettings().setRotateGesturesEnabled(false);
-        map.getUiSettings().setTiltGesturesEnabled(false);
-
-        map.setBuildingsEnabled(false);
-        map.setMyLocationEnabled(true);
-        map.setIndoorEnabled(false);
-        map.setTrafficEnabled(false);
-
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
-
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
-        progress.show();
 
         httpClient = new AndroidHttpClient("http://sumy.gps-tracker.com.ua/");
 
-        if (!checkInternetConnection()) {
-            showResponseError(1);
-        } else {
-            getRouteInformation();
+        TextView routeName = (TextView) findViewById(R.id.map_route_name);
+        routeName.setText(route.getDescription());
+
+        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();;
+
+        if (map != null) {
+
+            map.getUiSettings().setRotateGesturesEnabled(false);
+            map.getUiSettings().setTiltGesturesEnabled(false);
+
+            map.setBuildingsEnabled(false);
+            map.setMyLocationEnabled(true);
+            map.setIndoorEnabled(false);
+            map.setTrafficEnabled(false);
+
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
+
+            if (!checkInternetConnection()) {
+                showResponseError(1);
+            } else {
+                getRouteInformation();
+            }
         }
     }
 
@@ -128,7 +130,7 @@ public class MapActivity extends Activity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    JSONArray responseArray = new JSONObject(httpResponse.getBodyAsString()).getJSONArray("rows");
+                    JSONArray responseArray = new JSONObject(httpResponse.getBodyAsString().replace("\uFEFF", "")).getJSONArray("rows");
 
                     for (int i = 0; i < responseArray.length(); i++) {
                         JSONObject car = responseArray.getJSONObject(i);
@@ -196,7 +198,7 @@ public class MapActivity extends Activity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString());
+                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     for (int i=0; i<responseArray.length(); i++) {
                         JSONObject stop = responseArray.getJSONObject(i);
@@ -242,7 +244,7 @@ public class MapActivity extends Activity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString());
+                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     PolylineOptions routeTo = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
                     PolylineOptions routeFrom = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
@@ -288,6 +290,7 @@ public class MapActivity extends Activity {
 
     private void getRouteInformation() {
         progress.setMessage(this.getString(R.string.map_loading_route_info));
+        progress.show();
 
         ParameterMap params = httpClient.newParams()
                 .add("act", "marw")
@@ -297,7 +300,7 @@ public class MapActivity extends Activity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString());
+                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     if (responseArray.length() > 0) {
                         JSONObject routeInformation = responseArray.getJSONObject(0);
@@ -312,7 +315,6 @@ public class MapActivity extends Activity {
                     } else {
                         getRoutePath();
                     }
-
                 } catch (JSONException e){
                     e.printStackTrace();
 
