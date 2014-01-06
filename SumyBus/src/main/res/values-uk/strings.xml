@@ -7,8 +7,8 @@
     <string name="map_loading_route_info">Завантажую дані маршруту</string>
     <string name="map_loading_route_path">Завантажую маршрут</string>
     <string name="map_loading_route_stops">Завантажую список зупинок</string>
-    <string name="map_loading_route_cars">Завантажую спісок маршруток</string>
-    <string name="map_loading_window">Завантажую карту маршруту</string>
+    <string name="map_loading_route_cars">Завантажую список маршруток</string>
+    <string name="map_loading_window">Завантажую мапу маршруту</string>
     <string name="map_loading_error_no_internet">Активне підключення до інтернету не виявлено</string>
     <string name="map_loading_error_empty">На цьому маршруті поки ще не активовано GPS відстеження</string>
     <string name="close">Закрити</string>

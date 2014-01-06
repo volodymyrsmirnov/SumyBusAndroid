@@ -21,6 +21,7 @@ import com.turbomanage.httpclient.ParameterMap;
 
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.yandex.metrica.Counter;
 
 public class MapActivity extends Activity {
     private Route route;
@@ -31,6 +32,20 @@ public class MapActivity extends Activity {
     private Handler handler;
     private Runnable runnable;
     private HashMap<String, Marker> cars;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Counter.sharedInstance().onResumeActivity(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Counter.sharedInstance().onPauseActivity(this);
+    }
 
     @Override
     protected void onStop() {
@@ -129,7 +144,7 @@ public class MapActivity extends Activity {
 
                         if (!cars.containsKey(carId)) {
                             cars.put(carId, map.addMarker(new MarkerOptions()
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_small))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus))
                                     .position(new LatLng(carLat, carLng))
                                     .rotation(Double.valueOf(carAngle).floatValue())
                                     .flat(true)));
@@ -251,7 +266,7 @@ public class MapActivity extends Activity {
                     map.addPolyline(routeTo);
                     map.addPolyline(routeFrom);
 
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds.build(), 0));
+                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds.build(), 5));
 
                     getRouteStops();
 

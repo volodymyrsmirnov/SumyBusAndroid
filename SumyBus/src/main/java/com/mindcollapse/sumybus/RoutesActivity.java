@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.dd.plist.*;
+import com.yandex.metrica.Counter;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -20,16 +21,28 @@ public class RoutesActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        Counter.sharedInstance().onResumeActivity(this);
+
         if (progress != null && progress.isShowing()) {
             progress.hide();
         }
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        Counter.sharedInstance().onPauseActivity(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Counter.initialize(getApplicationContext());
+
         setContentView(R.layout.activity_routes);
+
 
         RoutesAdapter adapter = new RoutesAdapter(this, getRoutes());
 
@@ -68,7 +81,7 @@ public class RoutesActivity extends Activity {
             for (String routeName : routeNames) {
                 NSDictionary route = (NSDictionary)routesPlist.get(routeName);
 
-                Route newRoute = new Route(((NSNumber) route.get("id")).intValue(), routeName, ((NSString) route.get("name")).toString());
+                Route newRoute = new Route(((NSNumber) route.get("id")).intValue(), routeName, route.get("name").toString());
 
                 routes.add(newRoute);
             }

@@ -35,6 +35,38 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCWGf-cGMjpqPt53nucvPm4yt74Fe6bu74"/>
 
+        <meta-data android:name="metrica:api:key" android:value="6280" />
+
+        <service android:name="com.yandex.metrica.MetricaService" android:process=":Metrica" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.yandex.metrica.IMetricaService" />
+                <data android:scheme="metrica" />
+            </intent-filter>
+            <meta-data android:name="metrica:api:level" android:value="1" />
+        </service>
+
+        <receiver android:name="com.yandex.metrica.MetricaEventHandler" >
+            <intent-filter>
+                <action android:name="com.yandex.metrica.intent.action.SYNC" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.yandex.metrica.CampaignReceiver" android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="com.mindcollapse.sumybus.MetricaContentProvider"
+            android:authorities="com.mindcollapse.sumybus.MetricaContentProvider"
+            android:exported="true" />
 
     </application>
 
