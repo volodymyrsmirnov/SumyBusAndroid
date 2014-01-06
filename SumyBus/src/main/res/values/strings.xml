@@ -12,4 +12,10 @@
     <string name="map_loading_error_empty">This route does not seem to have GPS tracking enabled yet</string>
     <string name="close">Close</string>
 
+    <string name="rate_title">Rate %s</string>
+    <string name="rate_message">If you enjoy using %s, would you mind taking a moment to rate it? Thanks for your support!</string>
+    <string name="rate">Yes, Rate %s</string>
+    <string name="rate_later">Remind me later</string>
+    <string name="rate_cancel">No, Thanks</string>
+
 </resources>

@@ -13,4 +13,10 @@
     <string name="map_loading_error_empty">На этом маршруте пока еще не активировано GPS отслеживание</string>
     <string name="close">Закрыть</string>
 
+    <string name="rate_title">Оценить %s</string>
+    <string name="rate_message">Привет. Если вам понравился %s, оцените пиложение и напишите отзыв в Google Play Store. Спасибо!</string>
+    <string name="rate">Да, мне есть что сказать</string>
+    <string name="rate_later">Не сейчас, напомни мне чуть позже</string>
+    <string name="rate_cancel">Еще чего, нет у меня времени на это</string>
+
 </resources>

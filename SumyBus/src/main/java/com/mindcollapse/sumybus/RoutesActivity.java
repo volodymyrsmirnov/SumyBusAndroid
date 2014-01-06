@@ -11,6 +11,8 @@ import android.widget.ListView;
 import com.dd.plist.*;
 import com.yandex.metrica.Counter;
 
+import com.sbstrm.appirater.Appirater;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 
@@ -43,6 +45,7 @@ public class RoutesActivity extends Activity {
 
         setContentView(R.layout.activity_routes);
 
+        Appirater.appLaunched(this);
 
         RoutesAdapter adapter = new RoutesAdapter(this, getRoutes());
 
