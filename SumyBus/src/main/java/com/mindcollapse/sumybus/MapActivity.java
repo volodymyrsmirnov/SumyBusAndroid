@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Window;
 import android.widget.TextView;
 import android.os.Handler;
@@ -130,6 +131,8 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
+                    if (httpResponse == null) { showResponseError(1); return; }
+
                     JSONArray responseArray = new JSONObject(httpResponse.getBodyAsString().replace("\uFEFF", "")).getJSONArray("rows");
 
                     for (int i = 0; i < responseArray.length(); i++) {
@@ -198,6 +201,8 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
+                    if (httpResponse == null) { showResponseError(1); return; }
+
                     JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     for (int i=0; i<responseArray.length(); i++) {
@@ -244,6 +249,8 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
+                    if (httpResponse == null) { showResponseError(1); return; }
+
                     JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     PolylineOptions routeTo = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
@@ -300,6 +307,8 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
+                    if (httpResponse == null) { showResponseError(1); return; }
+
                     JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
 
                     if (responseArray.length() > 0) {
