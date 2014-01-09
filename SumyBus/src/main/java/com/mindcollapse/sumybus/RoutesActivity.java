@@ -34,6 +34,8 @@ public class RoutesActivity extends Activity {
     protected void onPause() {
         super.onPause();
 
+        progress.dismiss();
+
         Counter.sharedInstance().onPauseActivity(this);
     }
 

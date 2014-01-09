@@ -52,9 +52,7 @@ public class MapActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
 
-        if (progress.isShowing()) {
-            progress.hide();
-        }
+        progress.dismiss();
 
         if (runnable != null && handler != null) {
             handler.removeCallbacks(runnable);
@@ -87,6 +85,7 @@ public class MapActivity extends FragmentActivity {
         handler = new Handler();
 
         Activity topActivity = this;
+        final Activity selfActivity = this;
 
         while(topActivity.getParent() != null) {
             topActivity = topActivity.getParent();
@@ -94,6 +93,15 @@ public class MapActivity extends FragmentActivity {
 
         progress = new ProgressDialog(topActivity);
         progress.setCancelable(false);
+        progress.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(R.string.close), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+
+                selfActivity.finish();
+            }
+        });
+
 
         httpClient = new AndroidHttpClient("http://sumy.gps-tracker.com.ua/");
 
@@ -402,6 +410,10 @@ public class MapActivity extends FragmentActivity {
     }
 
     private void showResponseError(int reason) {
+        if (this.isFinishing()) {
+            return;
+        }
+
         String reasonText = "";
 
         if (reason == 1) {
@@ -414,15 +426,23 @@ public class MapActivity extends FragmentActivity {
             reasonText = this.getString(R.string.map_loading_error_content);
         }
 
-        final MapActivity activity = this;
-
         progress.hide();
 
-        new AlertDialog.Builder(this).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
+        Activity topActivity = this;
+        final MapActivity selfActivity = this;
+
+        while(topActivity.getParent() != null) {
+            topActivity = topActivity.getParent();
+        }
+
+        new AlertDialog.Builder(topActivity).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        activity.finish();
+                        dialog.dismiss();
+
+                        selfActivity.finish();
                     }
-                }).show();
+                }
+        ).show();
     }
 }
