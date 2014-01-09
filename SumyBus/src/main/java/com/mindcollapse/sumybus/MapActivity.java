@@ -1,9 +1,11 @@
 package com.mindcollapse.sumybus;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.model.*;
 import com.yandex.metrica.Counter;
 
 public class MapActivity extends FragmentActivity {
+    Boolean routeLoaded = false;
     private Route route;
     private GoogleMap map;
     private ProgressDialog progress;
@@ -38,6 +41,10 @@ public class MapActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
+        if (routeLoaded) {
+            getRouteCars();
+        }
+
         Counter.sharedInstance().onResumeActivity(this);
     }
 
@@ -45,15 +52,25 @@ public class MapActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
 
-        Counter.sharedInstance().onPauseActivity(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
+        if (progress.isShowing()) {
+            progress.hide();
+        }
 
         if (runnable != null && handler != null) {
             handler.removeCallbacks(runnable);
+        }
+
+        Counter.sharedInstance().onPauseActivity(this);
+    }
+
+    // hotfix google maps error on cheap china phones
+    // http://stackoverflow.com/a/20905954/2075875
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        try {
+            super.startActivityForResult(intent, requestCode);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -69,15 +86,28 @@ public class MapActivity extends FragmentActivity {
         cars = new HashMap<String, Marker>();
         handler = new Handler();
 
-        progress = new ProgressDialog(this);
+        Activity topActivity = this;
+
+        while(topActivity.getParent() != null) {
+            topActivity = topActivity.getParent();
+        }
+
+        progress = new ProgressDialog(topActivity);
         progress.setCancelable(false);
 
         httpClient = new AndroidHttpClient("http://sumy.gps-tracker.com.ua/");
 
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                getRouteCars();
+            }
+        };
+
         TextView routeName = (TextView) findViewById(R.id.map_route_name);
         routeName.setText(route.getDescription());
 
-        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();;
+        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 
         if (map != null) {
 
@@ -89,7 +119,11 @@ public class MapActivity extends FragmentActivity {
             map.setIndoorEnabled(false);
             map.setTrafficEnabled(false);
 
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
+            try {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
 
             if (!checkInternetConnection()) {
                 showResponseError(1);
@@ -108,14 +142,7 @@ public class MapActivity extends FragmentActivity {
     }
 
     private void getRouteCarsDelayed() {
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                getRouteCars();
-            }
-        };
-
-        handler.postDelayed(runnable, 10000);
+        handler.postDelayed(runnable, 20000);
     }
 
     private void getRouteCars() {
@@ -131,9 +158,17 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    if (httpResponse == null) { showResponseError(1); return; }
+                    JSONArray responseArray;
 
-                    JSONArray responseArray = new JSONObject(httpResponse.getBodyAsString().replace("\uFEFF", "")).getJSONArray("rows");
+                    try {
+                        responseArray = new JSONObject(httpResponse.getBodyAsString().replace("\uFEFF", "")).getJSONArray("rows");
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        showResponseError(3);
+                        return;
+                    }
+
+                    routeLoaded = true;
 
                     for (int i = 0; i < responseArray.length(); i++) {
                         JSONObject car = responseArray.getJSONObject(i);
@@ -201,9 +236,15 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    if (httpResponse == null) { showResponseError(1); return; }
+                    JSONArray responseArray;
 
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    try {
+                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        showResponseError(3);
+                        return;
+                    }
 
                     for (int i=0; i<responseArray.length(); i++) {
                         JSONObject stop = responseArray.getJSONObject(i);
@@ -223,7 +264,7 @@ public class MapActivity extends FragmentActivity {
                 } catch (JSONException e){
                     e.printStackTrace();
 
-                    showResponseError(2);
+                    showResponseError(3);
                 }
             }
 
@@ -231,7 +272,7 @@ public class MapActivity extends FragmentActivity {
             public void onError(Exception e) {
                 e.printStackTrace();
 
-                showResponseError(2);
+                showResponseError(3);
             }
         });
     }
@@ -249,9 +290,15 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    if (httpResponse == null) { showResponseError(1); return; }
+                    JSONArray responseArray;
 
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    try {
+                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        showResponseError(3);
+                        return;
+                    }
 
                     PolylineOptions routeTo = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
                     PolylineOptions routeFrom = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
@@ -282,7 +329,7 @@ public class MapActivity extends FragmentActivity {
                 } catch (JSONException e){
                     e.printStackTrace();
 
-                    showResponseError(2);
+                    showResponseError(3);
                 }
             }
 
@@ -290,7 +337,7 @@ public class MapActivity extends FragmentActivity {
             public void onError(Exception e) {
                 e.printStackTrace();
 
-                showResponseError(2);
+                showResponseError(3);
             }
         });
     }
@@ -307,9 +354,15 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onComplete(HttpResponse httpResponse) {
                 try {
-                    if (httpResponse == null) { showResponseError(1); return; }
+                    JSONArray responseArray;
 
-                    JSONArray responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    try {
+                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        showResponseError(3);
+                        return;
+                    }
 
                     if (responseArray.length() > 0) {
                         JSONObject routeInformation = responseArray.getJSONObject(0);
@@ -335,7 +388,7 @@ public class MapActivity extends FragmentActivity {
             public void onError(Exception e) {
                 e.printStackTrace();
 
-                showResponseError(2);
+                showResponseError(3);
             }
         });
     }
@@ -356,6 +409,9 @@ public class MapActivity extends FragmentActivity {
         }
         else if (reason == 2) {
             reasonText = this.getString(R.string.map_loading_error_empty);
+        }
+        else if (reason == 3) {
+            reasonText = this.getString(R.string.map_loading_error_content);
         }
 
         final MapActivity activity = this;

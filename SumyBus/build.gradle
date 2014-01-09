@@ -30,8 +30,6 @@ dependencies {
     compile 'com.googlecode.plist:dd-plist:1.3'
     compile 'com.yandex.android:mobmetricalib:1.0'
     compile 'com.google.protobuf:protobuf-java:2.4.1'
-    compile 'org.json:json:20131018'
-
 
     compile files('libs/basic-http-client-android-0.88.jar')
     compile files('libs/appirater-1.1.jar')

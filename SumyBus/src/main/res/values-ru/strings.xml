@@ -11,6 +11,7 @@
     <string name="map_loading_window">Загружаю карту маршрута</string>
     <string name="map_loading_error_no_internet">Активное подключение к интернету не обнаружено</string>
     <string name="map_loading_error_empty">На этом маршруте пока еще не активировано GPS отслеживание</string>
+    <string name="map_loading_error_content">Ошибка соединения, проверьте наличие интернета или попробуйте чуть позже</string>
     <string name="close">Закрыть</string>
 
     <string name="rate_title">Оценить %s</string>

@@ -10,6 +10,7 @@
     <string name="map_loading_window">Loading route map</string>
     <string name="map_loading_error_no_internet">No internet connection detected</string>
     <string name="map_loading_error_empty">This route does not seem to have GPS tracking enabled yet</string>
+    <string name="map_loading_error_content">Connection problem, check your internet or try again later</string>
     <string name="close">Close</string>
 
     <string name="rate_title">Rate %s</string>
