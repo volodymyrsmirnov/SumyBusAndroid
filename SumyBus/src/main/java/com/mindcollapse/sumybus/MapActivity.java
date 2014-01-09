@@ -10,6 +10,8 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.TextView;
 import android.os.Handler;
@@ -31,6 +33,7 @@ public class MapActivity extends FragmentActivity {
     private Route route;
     private GoogleMap map;
     private ProgressDialog progress;
+    private AlertDialog alert;
     private AndroidHttpClient httpClient;
     private int internalRouteId = 0;
     private Handler handler;
@@ -53,6 +56,10 @@ public class MapActivity extends FragmentActivity {
         super.onPause();
 
         progress.dismiss();
+
+        if (alert != null) {
+            alert.dismiss();
+        }
 
         if (runnable != null && handler != null) {
             handler.removeCallbacks(runnable);
@@ -97,7 +104,6 @@ public class MapActivity extends FragmentActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
-
                 selfActivity.finish();
             }
         });
@@ -115,29 +121,43 @@ public class MapActivity extends FragmentActivity {
         TextView routeName = (TextView) findViewById(R.id.map_route_name);
         routeName.setText(route.getDescription());
 
-        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        View contentView = this.findViewById(android.R.id.content);
+        ViewTreeObserver viewTree = null;
 
-        if (map != null) {
+        if (contentView != null) {
+            viewTree = contentView.getViewTreeObserver();
+        }
 
-            map.getUiSettings().setRotateGesturesEnabled(false);
-            map.getUiSettings().setTiltGesturesEnabled(false);
+        if (viewTree != null) {
+            viewTree.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 
-            map.setBuildingsEnabled(false);
-            map.setMyLocationEnabled(true);
-            map.setIndoorEnabled(false);
-            map.setTrafficEnabled(false);
+                    if (map != null) {
 
-            try {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
+                        map.getUiSettings().setRotateGesturesEnabled(false);
+                        map.getUiSettings().setTiltGesturesEnabled(false);
 
-            if (!checkInternetConnection()) {
-                showResponseError(1);
-            } else {
-                getRouteInformation();
-            }
+                        map.setBuildingsEnabled(false);
+                        map.setMyLocationEnabled(true);
+                        map.setIndoorEnabled(false);
+                        map.setTrafficEnabled(false);
+
+                        try {
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
+                        } catch (IllegalStateException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (!checkInternetConnection()) {
+                            showResponseError(1);
+                        } else {
+                            getRouteInformation();
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -410,7 +430,7 @@ public class MapActivity extends FragmentActivity {
     }
 
     private void showResponseError(int reason) {
-        if (this.isFinishing()) {
+        if (this.isFinishing() || (alert != null && alert.isShowing())) {
             return;
         }
 
@@ -435,14 +455,15 @@ public class MapActivity extends FragmentActivity {
             topActivity = topActivity.getParent();
         }
 
-        new AlertDialog.Builder(topActivity).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
+        alert = new AlertDialog.Builder(topActivity).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-
+                        alert.dismiss();
                         selfActivity.finish();
                     }
                 }
-        ).show();
+        ).create();
+
+        alert.show();
     }
 }
