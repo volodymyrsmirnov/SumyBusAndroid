@@ -8,25 +8,34 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
-import android.os.Handler;
 
-import org.json.*;
-import java.util.HashMap;
-
-import com.turbomanage.httpclient.android.AndroidHttpClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.turbomanage.httpclient.AsyncCallback;
 import com.turbomanage.httpclient.HttpResponse;
 import com.turbomanage.httpclient.ParameterMap;
-
-import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
+import com.turbomanage.httpclient.android.AndroidHttpClient;
 import com.yandex.metrica.Counter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 public class MapActivity extends FragmentActivity {
     Boolean routeLoaded = false;
@@ -91,14 +100,9 @@ public class MapActivity extends FragmentActivity {
         cars = new HashMap<String, Marker>();
         handler = new Handler();
 
-        Activity topActivity = this;
         final Activity selfActivity = this;
 
-        while(topActivity.getParent() != null) {
-            topActivity = topActivity.getParent();
-        }
-
-        progress = new ProgressDialog(topActivity);
+        progress = new ProgressDialog(this);
         progress.setCancelable(false);
         progress.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(R.string.close), new DialogInterface.OnClickListener() {
             @Override
@@ -222,10 +226,10 @@ public class MapActivity extends FragmentActivity {
                         }
 
 
-                        if ( carLat == 0 || carLng == 0 || carPLat == 0 || carPLng == 0 ||
-                             car.getString("inzone").equals("f") ||
-                             car.getString("color").equals("#555555") ||
-                             carLat == 10000 || carLng == 10000) {
+                        if (carLat == 0 || carLng == 0 || carPLat == 0 || carPLng == 0 ||
+                                car.getString("inzone").equals("f") ||
+                                car.getString("color").equals("#555555") ||
+                                carLat == 10000 || carLng == 10000) {
                             cars.get(carId).setVisible(false);
                         } else {
                             cars.get(carId).setVisible(true);
@@ -236,7 +240,7 @@ public class MapActivity extends FragmentActivity {
                         progress.hide();
                     }
 
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
                     getRouteCarsDelayed();
@@ -274,7 +278,7 @@ public class MapActivity extends FragmentActivity {
                         return;
                     }
 
-                    for (int i=0; i<responseArray.length(); i++) {
+                    for (int i = 0; i < responseArray.length(); i++) {
                         JSONObject stop = responseArray.getJSONObject(i);
 
                         LatLng stopPoint = new LatLng(stop.getDouble("lng"), stop.getDouble("lat"));
@@ -289,7 +293,7 @@ public class MapActivity extends FragmentActivity {
 
                     getRouteCars();
 
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
 
                     showResponseError(3);
@@ -333,7 +337,7 @@ public class MapActivity extends FragmentActivity {
 
                     LatLngBounds.Builder routeBounds = new LatLngBounds.Builder();
 
-                    for (int i=0; i<responseArray.length(); i++) {
+                    for (int i = 0; i < responseArray.length(); i++) {
                         JSONObject coordinate = responseArray.getJSONObject(i);
 
                         LatLng coordinatePoint = new LatLng(coordinate.getDouble("lng"), coordinate.getDouble("lat"));
@@ -354,7 +358,7 @@ public class MapActivity extends FragmentActivity {
 
                     getRouteStops();
 
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
 
                     showResponseError(3);
@@ -405,7 +409,7 @@ public class MapActivity extends FragmentActivity {
                     } else {
                         getRoutePath();
                     }
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
 
                     showResponseError(2);
@@ -422,7 +426,7 @@ public class MapActivity extends FragmentActivity {
     }
 
     private Boolean checkInternetConnection() {
-        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService (Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return (connectionManager.getActiveNetworkInfo() != null
                 && connectionManager.getActiveNetworkInfo().isAvailable()
@@ -438,24 +442,17 @@ public class MapActivity extends FragmentActivity {
 
         if (reason == 1) {
             reasonText = this.getString(R.string.map_loading_error_no_internet);
-        }
-        else if (reason == 2) {
+        } else if (reason == 2) {
             reasonText = this.getString(R.string.map_loading_error_empty);
-        }
-        else if (reason == 3) {
+        } else if (reason == 3) {
             reasonText = this.getString(R.string.map_loading_error_content);
         }
 
         progress.hide();
 
-        Activity topActivity = this;
-        final MapActivity selfActivity = this;
+        final Activity selfActivity = this;
 
-        while(topActivity.getParent() != null) {
-            topActivity = topActivity.getParent();
-        }
-
-        alert = new AlertDialog.Builder(topActivity).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
+        alert = new AlertDialog.Builder(this).setMessage(reasonText).setCancelable(false).setPositiveButton(R.string.close,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         alert.dismiss();
@@ -464,6 +461,10 @@ public class MapActivity extends FragmentActivity {
                 }
         ).create();
 
-        alert.show();
+        try {
+            alert.show();
+        } catch (WindowManager.BadTokenException e) {
+            this.finish();
+        }
     }
 }

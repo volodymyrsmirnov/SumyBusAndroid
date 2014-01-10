@@ -1,20 +1,21 @@
 package com.mindcollapse.sumybus;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.Activity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.dd.plist.*;
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSNumber;
+import com.dd.plist.PropertyListParser;
+import com.sbstrm.appirater.Appirater;
 import com.yandex.metrica.Counter;
 
-import com.sbstrm.appirater.Appirater;
-
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RoutesActivity extends Activity {
     private ProgressDialog progress;
@@ -84,14 +85,14 @@ public class RoutesActivity extends Activity {
             Arrays.sort(routeNames);
 
             for (String routeName : routeNames) {
-                NSDictionary route = (NSDictionary)routesPlist.get(routeName);
+                NSDictionary route = (NSDictionary) routesPlist.get(routeName);
 
                 Route newRoute = new Route(((NSNumber) route.get("id")).intValue(), routeName, route.get("name").toString());
 
                 routes.add(newRoute);
             }
 
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
