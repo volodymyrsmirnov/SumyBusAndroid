@@ -9,9 +9,10 @@
     <string name="map_loading_route_stops">Завантажую список зупинок</string>
     <string name="map_loading_route_cars">Завантажую список маршруток</string>
     <string name="map_loading_window">Завантажую мапу маршруту</string>
-    <string name="map_loading_error_no_internet">Активне підключення до інтернету не виявлено</string>
-    <string name="map_loading_error_empty">На цьому маршруті поки ще не активовано GPS відстеження</string>
-    <string name="map_loading_error_content">Помилка з\'єднання, перевірте наявність інтернету або спробуйте трохи пізніше</string>
+
+    <string name="error_connection_problem">Проблема з\'єднання або невірна відповідь сервера. Перевірте наявність Інтернету і спробуйте ще раз пізніше.</string>
+    <string name="error_route_no_gps">На цьому маршруті поки ще не активовано GPS відстеження.</string>
+
     <string name="close">Закрити</string>
 
     <string name="rate_title">Оцінити %s</string>

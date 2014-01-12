@@ -8,9 +8,10 @@
     <string name="map_loading_route_stops">Loading route stops</string>
     <string name="map_loading_route_cars">Loading route cars</string>
     <string name="map_loading_window">Loading route map</string>
-    <string name="map_loading_error_no_internet">No internet connection detected</string>
-    <string name="map_loading_error_empty">This route does not seem to have GPS tracking enabled yet</string>
-    <string name="map_loading_error_content">Connection problem, check your internet or try again later</string>
+
+    <string name="error_connection_problem">Connection problem or wrong server response. Check your internet availability and try again later.</string>
+    <string name="error_route_no_gps">This route does not seem to have GPS tracking enabled yet.</string>
+
     <string name="close">Close</string>
 
     <string name="rate_title">Rate %s</string>

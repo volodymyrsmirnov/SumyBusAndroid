@@ -3,13 +3,12 @@ package com.mindcollapse.sumybus;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -25,17 +24,16 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.turbomanage.httpclient.AsyncCallback;
-import com.turbomanage.httpclient.HttpResponse;
-import com.turbomanage.httpclient.ParameterMap;
-import com.turbomanage.httpclient.android.AndroidHttpClient;
+
+import com.google.gson.JsonElement;
 import com.yandex.metrica.Counter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 public class MapActivity extends FragmentActivity {
     Boolean routeLoaded = false;
@@ -43,11 +41,11 @@ public class MapActivity extends FragmentActivity {
     private GoogleMap map;
     private ProgressDialog progress;
     private AlertDialog alert;
-    private AndroidHttpClient httpClient;
     private int internalRouteId = 0;
     private Handler handler;
     private Runnable runnable;
     private HashMap<String, Marker> cars;
+    private static String apiURI = "http://sumy.gps-tracker.com.ua/mash.php";
 
     @Override
     protected void onResume() {
@@ -70,8 +68,8 @@ public class MapActivity extends FragmentActivity {
             alert.dismiss();
         }
 
-        if (runnable != null && handler != null) {
-            handler.removeCallbacks(runnable);
+        if (handler != null) {
+            handler.removeMessages(0);
         }
 
         Counter.sharedInstance().onPauseActivity(this);
@@ -112,9 +110,6 @@ public class MapActivity extends FragmentActivity {
             }
         });
 
-
-        httpClient = new AndroidHttpClient("http://sumy.gps-tracker.com.ua/");
-
         runnable = new Runnable() {
             @Override
             public void run() {
@@ -132,31 +127,28 @@ public class MapActivity extends FragmentActivity {
             viewTree = contentView.getViewTreeObserver();
         }
 
+        Ion.getDefault(this).configure()
+                .setLogging("MyLogs", Log.VERBOSE)
+                .userAgent("SumyBus (android, +http://j.mp/sumybus_android)");
+
         if (viewTree != null) {
             viewTree.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+                    if (map == null) {
+                        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 
-                    if (map != null) {
+                        if (map != null) {
+                            map.getUiSettings().setRotateGesturesEnabled(false);
+                            map.getUiSettings().setTiltGesturesEnabled(false);
 
-                        map.getUiSettings().setRotateGesturesEnabled(false);
-                        map.getUiSettings().setTiltGesturesEnabled(false);
+                            map.setBuildingsEnabled(false);
+                            map.setMyLocationEnabled(true);
+                            map.setIndoorEnabled(false);
+                            map.setTrafficEnabled(false);
 
-                        map.setBuildingsEnabled(false);
-                        map.setMyLocationEnabled(true);
-                        map.setIndoorEnabled(false);
-                        map.setTrafficEnabled(false);
-
-                        try {
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(50.91, 34.8), 12));
-                        } catch (IllegalStateException e) {
-                            e.printStackTrace();
-                        }
 
-                        if (!checkInternetConnection()) {
-                            showResponseError(1);
-                        } else {
                             getRouteInformation();
                         }
                     }
@@ -165,16 +157,129 @@ public class MapActivity extends FragmentActivity {
         }
     }
 
-    private double coordStringToDouble(String coord) {
-        if (coord.length() == 0 || coord.equals("null")) {
-            return 0;
-        } else {
-            return Double.parseDouble(coord);
-        }
+    private void getRouteInformation() {
+        progress.setMessage(this.getString(R.string.map_loading_route_info));
+        progress.show();
+
+        Ion.with(this, apiURI)
+                .addQuery("act", "marw")
+                .addQuery("id", Integer.toString(route.getId()))
+                .asJsonArray()
+                .setCallback(new FutureCallback<JsonArray>() {
+                    @Override
+                    public void onCompleted(Exception responseError, JsonArray result) {
+                        if (responseError != null && responseError instanceof com.google.gson.JsonParseException) {
+                            showResponseError(2);
+                        }
+                        else if (responseError != null || result == null || result.size() == 0 || !result.get(0).getAsJsonObject().has("id")) {
+                            showResponseError(1);
+                        } else {
+                            internalRouteId = result.get(0).getAsJsonObject().get("id").getAsInt();
+                            getRoutePath();
+                        }
+                    }
+                });
     }
 
-    private void getRouteCarsDelayed() {
-        handler.postDelayed(runnable, 20000);
+
+    private void getRoutePath() {
+        progress.setMessage(this.getString(R.string.map_loading_route_path));
+
+        Ion.with(this, apiURI)
+                .addQuery("act", "path")
+                .addQuery("id", Integer.toString(route.getId()))
+                .addQuery("mar", Integer.toString(internalRouteId))
+                .asJsonArray()
+                .setCallback(new FutureCallback<JsonArray>() {
+                    @Override
+                    public void onCompleted(Exception responseError, JsonArray result) {
+                        if (responseError != null || result == null || result.size() == 0) {
+                            showResponseError(1);
+                        } else {
+                            PolylineOptions routeTo = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
+                            PolylineOptions routeFrom = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
+
+                            LatLngBounds.Builder routeBounds = new LatLngBounds.Builder();
+
+                            for (JsonElement routePoint : result) {
+                                JsonObject routePointObject = routePoint.getAsJsonObject();
+
+                                if (!routePointObject.has("lng") || !routePointObject.has("lat") || !routePointObject.has("direction")) {
+                                    showResponseError(1);
+                                    return;
+                                } else {
+                                    LatLng coordinatePoint = new LatLng(routePointObject.get("lng").getAsDouble(), routePointObject.get("lat").getAsDouble());
+
+                                    routeBounds.include(coordinatePoint);
+
+                                    if (routePointObject.get("direction").getAsString().equals("t")) {
+                                        routeTo.add(coordinatePoint);
+                                    } else {
+                                        routeFrom.add(coordinatePoint);
+                                    }
+                                }
+
+                            }
+
+                            map.addPolyline(routeTo);
+                            map.addPolyline(routeFrom);
+
+                            map.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds.build(), 5));
+
+                            getRouteStops();
+                        }
+                    }
+                });
+    }
+
+    private void getRouteStops() {
+        progress.setMessage(this.getString(R.string.map_loading_route_stops));
+
+        Ion.with(this, apiURI)
+                .addQuery("act", "stops")
+                .addQuery("id", Integer.toString(route.getId()))
+                .addQuery("mar", Integer.toString(internalRouteId))
+                .asJsonArray()
+                .setCallback(new FutureCallback<JsonArray>() {
+                    @Override
+                    public void onCompleted(Exception responseError, JsonArray result) {
+                        if (responseError != null || result == null || result.size() == 0) {
+                            showResponseError(1);
+                        } else {
+                            for (JsonElement routeStop : result) {
+                                JsonObject routeStopObject = routeStop.getAsJsonObject();
+
+                                if (!routeStopObject.has("lng") || !routeStopObject.has("lat") || !routeStopObject.has("name")) {
+                                    showResponseError(1);
+                                } else {
+                                    LatLng routeStopCoordinate = new LatLng(routeStopObject.get("lng").getAsDouble(), routeStopObject.get("lat").getAsDouble());
+
+                                    map.addMarker(new MarkerOptions()
+                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop))
+                                            .position(routeStopCoordinate)
+                                            .title(routeStopObject.get("name").getAsString())
+                                            .flat(true));
+                                }
+                            }
+
+                            getRouteCars();
+                        }
+                    }
+                });
+    }
+
+    private double coordinateStringToDouble(JsonObject routeCarObject, String keyName) {
+        JsonElement key = routeCarObject.get(keyName);
+
+        if (key.isJsonNull()) {
+            return 0;
+        } else {
+            try {
+                return key.getAsDouble();
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
     }
 
     private void getRouteCars() {
@@ -182,255 +287,71 @@ public class MapActivity extends FragmentActivity {
             progress.setMessage(this.getString(R.string.map_loading_route_cars));
         }
 
-        ParameterMap params = httpClient.newParams()
-                .add("act", "cars")
-                .add("id", Integer.toString(route.getId()));
-
-        httpClient.get("mash.php", params, new AsyncCallback() {
-            @Override
-            public void onComplete(HttpResponse httpResponse) {
-                try {
-                    JSONArray responseArray;
-
-                    try {
-                        responseArray = new JSONObject(httpResponse.getBodyAsString().replace("\uFEFF", "")).getJSONArray("rows");
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        showResponseError(3);
-                        return;
-                    }
-
-                    routeLoaded = true;
-
-                    for (int i = 0; i < responseArray.length(); i++) {
-                        JSONObject car = responseArray.getJSONObject(i);
-
-                        String carId = car.getString("CarId");
-
-                        double carLat = coordStringToDouble(car.getString("X"));
-                        double carLng = coordStringToDouble(car.getString("Y"));
-                        double carPLat = coordStringToDouble(car.getString("pX"));
-                        double carPLng = coordStringToDouble(car.getString("pY"));
-
-                        double carAngle = 90 - (Math.atan2(carLat - carPLat, carLng - carPLng) / Math.PI) * 180;
-
-                        if (!cars.containsKey(carId)) {
-                            cars.put(carId, map.addMarker(new MarkerOptions()
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus))
-                                    .position(new LatLng(carLat, carLng))
-                                    .rotation(Double.valueOf(carAngle).floatValue())
-                                    .flat(true)));
+        Ion.with(this, apiURI)
+                .noCache()
+                .addQuery("act", "cars")
+                .addQuery("id", Integer.toString(route.getId()))
+                .addQuery("nc", Long.toHexString(Double.doubleToLongBits(Math.random())))
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception responseError, JsonObject result) {
+                        if (responseError != null || result == null || !result.has("rows")) {
+                            if (!routeLoaded) {
+                                showResponseError(1);
+                            }
                         } else {
-                            cars.get(carId).setPosition(new LatLng(carLat, carLng));
-                            cars.get(carId).setRotation(Double.valueOf(carAngle).floatValue());
+                            JsonArray routeCarsRows = result.getAsJsonArray("rows");
+
+                            routeLoaded = true;
+
+                            for (JsonElement routeCar : routeCarsRows) {
+                                JsonObject routeCarObject = routeCar.getAsJsonObject();
+
+                                if (!routeCarObject.has("X") || !routeCarObject.has("Y") || !routeCarObject.has("pX") ||
+                                        !routeCarObject.has("pY") || !routeCarObject.has("inzone") || !routeCarObject.has("color")) {
+                                    if (!routeLoaded) {
+                                        showResponseError(1);
+                                    }
+                                } else {
+                                    String routeCarID = routeCarObject.get("CarId").getAsString();
+
+                                    double routeCarLat = coordinateStringToDouble(routeCarObject, "X");
+                                    double routeCarLng = coordinateStringToDouble(routeCarObject, "Y");
+                                    double routeCarPLat = coordinateStringToDouble(routeCarObject, "pX");
+                                    double routeCarPLng = coordinateStringToDouble(routeCarObject, "pY");
+
+                                    double routeCarAngle = 90 - (Math.atan2(routeCarLat - routeCarPLat, routeCarLng - routeCarPLng) / Math.PI) * 180;
+
+                                    if (!cars.containsKey(routeCarID)) {
+                                        cars.put(routeCarID, map.addMarker(new MarkerOptions()
+                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus))
+                                                .position(new LatLng(routeCarLat, routeCarLng))
+                                                .rotation(Double.valueOf(routeCarAngle).floatValue())
+                                                .flat(true)));
+                                    } else {
+                                        cars.get(routeCarID).setPosition(new LatLng(routeCarLat, routeCarLng));
+                                        cars.get(routeCarID).setRotation(Double.valueOf(routeCarAngle).floatValue());
+                                    }
+
+                                    if (routeCarLat == 0 || routeCarLng == 0 || routeCarPLat == 0 || routeCarPLng == 0 ||
+                                            routeCarObject.get("inzone").getAsString().equals("f") || routeCarObject.get("color").getAsString().equals("#555555") ||
+                                            routeCarLat == 10000 || routeCarLng == 10000) {
+                                        cars.get(routeCarID).setVisible(false);
+                                    } else {
+                                        cars.get(routeCarID).setVisible(true);
+                                    }
+                                }
+
+                                if (progress.isShowing()) {
+                                    progress.hide();
+                                }
+                            }
                         }
 
-
-                        if (carLat == 0 || carLng == 0 || carPLat == 0 || carPLng == 0 ||
-                                car.getString("inzone").equals("f") ||
-                                car.getString("color").equals("#555555") ||
-                                carLat == 10000 || carLng == 10000) {
-                            cars.get(carId).setVisible(false);
-                        } else {
-                            cars.get(carId).setVisible(true);
-                        }
+                        handler.postDelayed(runnable, 20000);
                     }
-
-                    if (progress.isShowing()) {
-                        progress.hide();
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } finally {
-                    getRouteCarsDelayed();
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-
-                getRouteCarsDelayed();
-            }
-        });
-    }
-
-    private void getRouteStops() {
-        progress.setMessage(this.getString(R.string.map_loading_route_stops));
-
-        ParameterMap params = httpClient.newParams()
-                .add("act", "stops")
-                .add("id", Integer.toString(route.getId()))
-                .add("mar", Integer.toString(internalRouteId));
-
-        httpClient.get("mash.php", params, new AsyncCallback() {
-            @Override
-            public void onComplete(HttpResponse httpResponse) {
-                try {
-                    JSONArray responseArray;
-
-                    try {
-                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        showResponseError(3);
-                        return;
-                    }
-
-                    for (int i = 0; i < responseArray.length(); i++) {
-                        JSONObject stop = responseArray.getJSONObject(i);
-
-                        LatLng stopPoint = new LatLng(stop.getDouble("lng"), stop.getDouble("lat"));
-
-                        map.addMarker(new MarkerOptions()
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop))
-                                .position(stopPoint)
-                                .title(stop.getString("name"))
-                                .flat(true));
-
-                    }
-
-                    getRouteCars();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-                    showResponseError(3);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-
-                showResponseError(3);
-            }
-        });
-    }
-
-
-    private void getRoutePath() {
-        progress.setMessage(this.getString(R.string.map_loading_route_path));
-
-        ParameterMap params = httpClient.newParams()
-                .add("act", "path")
-                .add("id", Integer.toString(route.getId()))
-                .add("mar", Integer.toString(internalRouteId));
-
-        httpClient.get("mash.php", params, new AsyncCallback() {
-            @Override
-            public void onComplete(HttpResponse httpResponse) {
-                try {
-                    JSONArray responseArray;
-
-                    try {
-                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        showResponseError(3);
-                        return;
-                    }
-
-                    PolylineOptions routeTo = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
-                    PolylineOptions routeFrom = new PolylineOptions().color(getResources().getColor(R.color.route_color_to)).width(5);
-
-                    LatLngBounds.Builder routeBounds = new LatLngBounds.Builder();
-
-                    for (int i = 0; i < responseArray.length(); i++) {
-                        JSONObject coordinate = responseArray.getJSONObject(i);
-
-                        LatLng coordinatePoint = new LatLng(coordinate.getDouble("lng"), coordinate.getDouble("lat"));
-
-                        if (coordinate.getString("direction").equals("t")) {
-                            routeTo.add(coordinatePoint);
-                        } else {
-                            routeFrom.add(coordinatePoint);
-                        }
-
-                        routeBounds.include(coordinatePoint);
-                    }
-
-                    map.addPolyline(routeTo);
-                    map.addPolyline(routeFrom);
-
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds.build(), 5));
-
-                    getRouteStops();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-                    showResponseError(3);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-
-                showResponseError(3);
-            }
-        });
-    }
-
-    private void getRouteInformation() {
-        progress.setMessage(this.getString(R.string.map_loading_route_info));
-        progress.show();
-
-        ParameterMap params = httpClient.newParams()
-                .add("act", "marw")
-                .add("id", Integer.toString(route.getId()));
-
-        httpClient.get("mash.php", params, new AsyncCallback() {
-            @Override
-            public void onComplete(HttpResponse httpResponse) {
-                try {
-                    JSONArray responseArray;
-
-                    try {
-                        responseArray = new JSONArray(httpResponse.getBodyAsString().replace("\uFEFF", ""));
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        showResponseError(3);
-                        return;
-                    }
-
-                    if (responseArray.length() > 0) {
-                        JSONObject routeInformation = responseArray.getJSONObject(0);
-
-                        if (routeInformation.has("id")) {
-                            internalRouteId = routeInformation.getInt("id");
-                        }
-                    }
-
-                    if (internalRouteId == 0) {
-                        showResponseError(2);
-                    } else {
-                        getRoutePath();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-                    showResponseError(2);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-
-                showResponseError(3);
-            }
-        });
-    }
-
-    private Boolean checkInternetConnection() {
-        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        return (connectionManager.getActiveNetworkInfo() != null
-                && connectionManager.getActiveNetworkInfo().isAvailable()
-                && connectionManager.getActiveNetworkInfo().isConnected());
+                });
     }
 
     private void showResponseError(int reason) {
@@ -441,11 +362,9 @@ public class MapActivity extends FragmentActivity {
         String reasonText = "";
 
         if (reason == 1) {
-            reasonText = this.getString(R.string.map_loading_error_no_internet);
+            reasonText = this.getString(R.string.error_connection_problem);
         } else if (reason == 2) {
-            reasonText = this.getString(R.string.map_loading_error_empty);
-        } else if (reason == 3) {
-            reasonText = this.getString(R.string.map_loading_error_content);
+            reasonText = this.getString(R.string.error_route_no_gps);
         }
 
         progress.hide();
