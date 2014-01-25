@@ -34,5 +34,6 @@ dependencies {
     compile 'com.yandex.android:mobmetricalib:1.0'
     compile 'com.google.protobuf:protobuf-java:2.4.1'
     compile 'com.koushikdutta.ion:ion:1.2.1'
+
 }
 

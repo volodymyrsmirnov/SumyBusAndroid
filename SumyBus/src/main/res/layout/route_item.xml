@@ -3,19 +3,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
+    android:paddingRight="10dp"
     android:background="@drawable/route_item_selector"
     android:clickable="false"
     android:focusableInTouchMode="false"
     android:focusable="false">
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/route_icon"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:src="@drawable/ic_bus"
-        android:padding="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,7 +16,8 @@
         android:text="57A"
         android:id="@+id/route_name"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/route_icon" />
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,7 +26,35 @@
         android:text="Тополянська - Василівка"
         android:id="@+id/route_description"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:paddingRight="10dp" />
-</RelativeLayout>
+        android:layout_toLeftOf="@+id/route_icon" />
 
+    <RelativeLayout
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/route_icon"
+        android:layout_centerVertical="true"
+        android:background="@drawable/circle_shape"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentRight="true"
+        >
+
+        <ProgressBar
+            android:id="@+id/route_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:visibility="invisible"
+            style="@android:style/Widget.ProgressBar.Small.Inverse" />
+
+        <TextView
+            android:id="@+id/route_cars_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/circle_text"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+</RelativeLayout>

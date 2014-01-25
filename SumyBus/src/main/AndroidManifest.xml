@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mindcollapse.sumybus"
-    android:versionCode="8"
-    android:versionName="1.5.1"
+    android:versionCode="9"
+    android:versionName="2.0"
     android:installLocation="auto">
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:hardwareAccelerated="true">
         <activity
             android:name="com.mindcollapse.sumybus.RoutesActivity"
             android:label="@string/app_name">

@@ -10,6 +10,10 @@
     <string name="map_loading_route_cars">Завантажую список маршруток</string>
     <string name="map_loading_window">Завантажую мапу маршруту</string>
 
+    <string name="refreshlistview_updating">Оновлюю</string>
+    <string name="refreshlistview_release">Відпусти для оновлення</string>
+    <string name="refreshlistview_pulldown">Потягни вниз для оновлення</string>
+
     <string name="error_connection_problem">Проблема з\'єднання або невірна відповідь сервера. Перевірте наявність Інтернету і спробуйте ще раз пізніше.</string>
     <string name="error_route_no_gps">На цьому маршруті поки ще не активовано GPS відстеження.</string>
 

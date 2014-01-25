@@ -25,13 +25,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.google.gson.JsonElement;
 import com.yandex.metrica.Counter;
 
 import java.util.HashMap;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
@@ -347,9 +347,9 @@ public class MapActivity extends FragmentActivity {
                                     progress.hide();
                                 }
                             }
-                        }
 
-                        handler.postDelayed(runnable, 20000);
+                            handler.postDelayed(runnable, 10000);
+                        }
                     }
                 });
     }
